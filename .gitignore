@@ -1,0 +1,27 @@
+# Maven target folder
+/target/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Maven wrapper (optional — keep if team wants)
+.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class files
+*.class

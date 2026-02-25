@@ -1,0 +1,39 @@
+package com.bridgelabz;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class QuantityMeasurementAppTest {
+
+    @Test
+    void givenSameFeetValue_whenCompared_thenShouldReturnTrue() {
+        QuantityMeasurementApp.Feet f1 = new QuantityMeasurementApp.Feet(1.0);
+        QuantityMeasurementApp.Feet f2 = new QuantityMeasurementApp.Feet(1.0);
+        assertTrue(f1.equals(f2));
+    }
+
+    @Test
+    void givenDifferentFeetValue_whenCompared_thenShouldReturnFalse() {
+        QuantityMeasurementApp.Feet f1 = new QuantityMeasurementApp.Feet(1.0);
+        QuantityMeasurementApp.Feet f2 = new QuantityMeasurementApp.Feet(2.0);
+        assertFalse(f1.equals(f2));
+    }
+
+    @Test
+    void givenFeet_whenComparedWithNull_thenShouldReturnFalse() {
+        QuantityMeasurementApp.Feet f1 = new QuantityMeasurementApp.Feet(1.0);
+        assertFalse(f1.equals(null));
+    }
+
+    @Test
+    void givenSameReference_whenCompared_thenShouldReturnTrue() {
+        QuantityMeasurementApp.Feet f1 = new QuantityMeasurementApp.Feet(1.0);
+        assertTrue(f1.equals(f1));
+    }
+
+    @Test
+    void givenFeet_whenComparedWithDifferentType_thenShouldReturnFalse() {
+        QuantityMeasurementApp.Feet f1 = new QuantityMeasurementApp.Feet(1.0);
+        assertFalse(f1.equals("not a number"));
+    }
+}
