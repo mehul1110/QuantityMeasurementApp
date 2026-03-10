@@ -28,6 +28,14 @@ public class QuantityLength {
         this.unit = unit;
     }
 
+    public double getValue() {
+        return value;
+    }
+
+    public LengthUnit getUnit() {
+        return unit;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -42,4 +50,29 @@ public class QuantityLength {
     public String toString() {
         return value + " " + unit.name();
     }
+
+    /**
+     * Converts this QuantityLength to the target unit.
+     * Returns a NEW QuantityLength object (immutable).
+     *
+     * @param targetUnit the unit to convert to; must not be null
+     * @return new QuantityLength in the target unit, rounded to 6 decimal places
+     * @throws IllegalArgumentException if targetUnit is null, or value is NaN/Infinite
+     */
+    public QuantityLength convertTo(LengthUnit targetUnit) {
+        if (targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+        if (Double.isNaN(this.value) || Double.isInfinite(this.value))
+            throw new IllegalArgumentException("Value must be finite");
+
+        double baseValue = this.value * this.unit.getConversionFactor();      // to feet
+        double result    = baseValue  / targetUnit.getConversionFactor();      // to target
+
+        // Round to 6 decimal places
+        double factor = 1_000_000.0;
+        result = Math.round(result * factor) / factor;
+
+        return new QuantityLength(result, targetUnit);
+    }
 }
+

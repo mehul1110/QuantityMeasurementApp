@@ -22,26 +22,35 @@ public class QuantityMeasurementApp {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println("--- Same-unit comparisons ---");
-        System.out.println("compareFeet(1.0, 1.0)    : " + compareFeet(1.0, 1.0));
-        System.out.println("compareInches(12.0, 12.0): " + compareInches(12.0, 12.0));
+    public static QuantityLength demonstrateLengthConversion(double value, LengthUnit from, LengthUnit to) {
+        QuantityLength source = new QuantityLength(value, from);
+        QuantityLength converted = source.convertTo(to);
+        System.out.println(source + " => " + converted);
+        return converted;
+    }
 
-        System.out.println("\n--- Cross-unit: Feet <-> Inches ---");
+    public static QuantityLength demonstrateLengthConversion(QuantityLength length, LengthUnit to) {
+        QuantityLength converted = length.convertTo(to);
+        System.out.println(length + " => " + converted);
+        return converted;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("--- Equality checks ---");
         QuantityLength oneFoot      = new QuantityLength(1.0,  LengthUnit.FEET);
         QuantityLength twelveInches = new QuantityLength(12.0, LengthUnit.INCHES);
-        demonstrateLengthEquality(oneFoot, twelveInches);   // true
+        demonstrateLengthEquality(oneFoot, twelveInches);
 
-        System.out.println("\n--- Cross-unit: Yards ---");
-        QuantityLength oneYard   = new QuantityLength(1.0,  LengthUnit.YARDS);
-        QuantityLength threeFeet = new QuantityLength(3.0,  LengthUnit.FEET);
+        QuantityLength oneYard         = new QuantityLength(1.0,  LengthUnit.YARDS);
         QuantityLength thirtySixInches = new QuantityLength(36.0, LengthUnit.INCHES);
-        demonstrateLengthEquality(oneYard, threeFeet);         // true
-        demonstrateLengthEquality(oneYard, thirtySixInches);   // true
+        demonstrateLengthEquality(oneYard, thirtySixInches);
 
-        System.out.println("\n--- Cross-unit: Centimeters ---");
-        QuantityLength twoPointFiveFourCm = new QuantityLength(2.54,  LengthUnit.CENTIMETERS);
-        QuantityLength oneInch            = new QuantityLength(1.0,   LengthUnit.INCHES);
-        demonstrateLengthEquality(twoPointFiveFourCm, oneInch);  // approximately true
+        System.out.println("\n--- UC5: Conversions ---");
+        demonstrateLengthConversion(1.0,  LengthUnit.FEET,        LengthUnit.INCHES);
+        demonstrateLengthConversion(24.0, LengthUnit.INCHES,      LengthUnit.FEET);
+        demonstrateLengthConversion(1.0,  LengthUnit.YARDS,       LengthUnit.INCHES);
+        demonstrateLengthConversion(6.0,  LengthUnit.FEET,        LengthUnit.YARDS);
+        demonstrateLengthConversion(2.54, LengthUnit.CENTIMETERS, LengthUnit.INCHES);
+        demonstrateLengthConversion(new QuantityLength(1.0, LengthUnit.YARDS), LengthUnit.FEET);
     }
 }
