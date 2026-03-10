@@ -74,5 +74,42 @@ public class QuantityLength {
 
         return new QuantityLength(result, targetUnit);
     }
+
+    /**
+     * Helper: converts both operands to feet and returns their sum in feet.
+     *
+     * @param other the other QuantityLength to add; must not be null and must be finite
+     * @return sum of both lengths expressed in feet (base unit)
+     * @throws IllegalArgumentException if other is null or other's value is not finite
+     */
+    private double addToBaseUnit(QuantityLength other) {
+        if (other == null)
+            throw new IllegalArgumentException("Operand cannot be null");
+        if (Double.isNaN(other.value) || Double.isInfinite(other.value))
+            throw new IllegalArgumentException("Operand value must be finite");
+
+        double thisBase  = this.value  * this.unit.getConversionFactor();
+        double otherBase = other.value * other.unit.getConversionFactor();
+        return thisBase + otherBase;
+    }
+
+    /**
+     * Adds another QuantityLength to this one.
+     * The result is expressed in THIS object's unit, rounded to 2 decimal places.
+     * Returns a NEW QuantityLength (immutable — originals unchanged).
+     *
+     * @param other the QuantityLength to add; must not be null
+     * @return new QuantityLength in this.unit
+     */
+    public QuantityLength add(QuantityLength other) {
+        double baseSum = addToBaseUnit(other);                               // sum in feet
+        double result  = baseSum / this.unit.getConversionFactor();          // convert to this.unit
+
+        // Round to 2 decimal places
+        double factor = 100.0;
+        result = Math.round(result * factor) / factor;
+
+        return new QuantityLength(result, this.unit);
+    }
 }
 

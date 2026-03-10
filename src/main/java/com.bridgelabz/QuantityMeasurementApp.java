@@ -35,6 +35,12 @@ public class QuantityMeasurementApp {
         return converted;
     }
 
+    public static QuantityLength demonstrateLengthAddition(QuantityLength l1, QuantityLength l2) {
+        QuantityLength result = l1.add(l2);
+        System.out.println(l1 + " + " + l2 + " = " + result);
+        return result;
+    }
+
     public static void main(String[] args) {
         System.out.println("--- Equality checks ---");
         QuantityLength oneFoot      = new QuantityLength(1.0,  LengthUnit.FEET);
@@ -52,5 +58,15 @@ public class QuantityMeasurementApp {
         demonstrateLengthConversion(6.0,  LengthUnit.FEET,        LengthUnit.YARDS);
         demonstrateLengthConversion(2.54, LengthUnit.CENTIMETERS, LengthUnit.INCHES);
         demonstrateLengthConversion(new QuantityLength(1.0, LengthUnit.YARDS), LengthUnit.FEET);
+
+        System.out.println("\n--- UC6: Addition ---");
+        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.FEET),
+                                  new QuantityLength(2.0,  LengthUnit.FEET));     // 3.0 ft
+        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.FEET),
+                                  new QuantityLength(12.0, LengthUnit.INCHES));   // 2.0 ft
+        demonstrateLengthAddition(new QuantityLength(12.0, LengthUnit.INCHES),
+                                  new QuantityLength(1.0,  LengthUnit.FEET));     // 24.0 in
+        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.YARDS),
+                                  new QuantityLength(3.0,  LengthUnit.FEET));     // 2.0 yd
     }
-}
+}
