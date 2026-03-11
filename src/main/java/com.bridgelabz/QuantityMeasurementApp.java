@@ -1,107 +1,57 @@
 package com.bridgelabz;
 
-import com.bridgelabz.LengthUnit;
-
 public class QuantityMeasurementApp {
 
-    public static boolean compareFeet(double val1, double val2) {
-        QuantityLength l1 = new QuantityLength(val1, LengthUnit.FEET);
-        QuantityLength l2 = new QuantityLength(val2, LengthUnit.FEET);
-        return l1.equals(l2);
-    }
-
-    public static boolean compareInches(double val1, double val2) {
-        QuantityLength l1 = new QuantityLength(val1, LengthUnit.INCHES);
-        QuantityLength l2 = new QuantityLength(val2, LengthUnit.INCHES);
-        return l1.equals(l2);
-    }
-
-    public static boolean demonstrateLengthEquality(QuantityLength l1, QuantityLength l2) {
-        boolean result = l1.equals(l2);
-        System.out.println(l1 + " == " + l2 + " ? " + result);
+    public static boolean demonstrateEquality(Quantity<?> q1, Quantity<?> q2) {
+        boolean result = q1.equals(q2);
+        System.out.println(q1 + " == " + q2 + " ? " + result);
         return result;
     }
 
-    public static QuantityLength demonstrateLengthConversion(double value, LengthUnit from, LengthUnit to) {
-        QuantityLength source = new QuantityLength(value, from);
-        QuantityLength converted = source.convertTo(to);
-        System.out.println(source + " => " + converted);
+    public static <U extends IMeasurable> Quantity<U> demonstrateConversion(Quantity<U> q, U targetUnit) {
+        Quantity<U> converted = q.convertTo(targetUnit);
+        System.out.println(q + " => " + converted);
         return converted;
     }
 
-    public static QuantityLength demonstrateLengthConversion(QuantityLength length, LengthUnit to) {
-        QuantityLength converted = length.convertTo(to);
-        System.out.println(length + " => " + converted);
-        return converted;
-    }
-
-    public static QuantityLength demonstrateLengthAddition(QuantityLength l1, QuantityLength l2) {
-        QuantityLength result = l1.add(l2);
-        System.out.println(l1 + " + " + l2 + " = " + result);
+    public static <U extends IMeasurable> Quantity<U> demonstrateAddition(Quantity<U> q1, Quantity<U> q2, U targetUnit) {
+        Quantity<U> result = q1.add(q2, targetUnit);
+        System.out.println(q1 + " + " + q2 + " = " + result);
         return result;
     }
 
     public static void main(String[] args) {
         System.out.println("--- Equality checks ---");
-        QuantityLength oneFoot      = new QuantityLength(1.0,  LengthUnit.FEET);
-        QuantityLength twelveInches = new QuantityLength(12.0, LengthUnit.INCHES);
-        demonstrateLengthEquality(oneFoot, twelveInches);
+        Quantity<LengthUnit> oneFoot      = new Quantity<>(1.0,  LengthUnit.FEET);
+        Quantity<LengthUnit> twelveInches = new Quantity<>(12.0, LengthUnit.INCHES);
+        demonstrateEquality(oneFoot, twelveInches);
 
-        QuantityLength oneYard         = new QuantityLength(1.0,  LengthUnit.YARDS);
-        QuantityLength thirtySixInches = new QuantityLength(36.0, LengthUnit.INCHES);
-        demonstrateLengthEquality(oneYard, thirtySixInches);
+        Quantity<LengthUnit> oneYard         = new Quantity<>(1.0,  LengthUnit.YARDS);
+        Quantity<LengthUnit> thirtySixInches = new Quantity<>(36.0, LengthUnit.INCHES);
+        demonstrateEquality(oneYard, thirtySixInches);
 
         System.out.println("\n--- UC5: Conversions ---");
-        demonstrateLengthConversion(1.0,  LengthUnit.FEET,        LengthUnit.INCHES);
-        demonstrateLengthConversion(24.0, LengthUnit.INCHES,      LengthUnit.FEET);
-        demonstrateLengthConversion(1.0,  LengthUnit.YARDS,       LengthUnit.INCHES);
-        demonstrateLengthConversion(6.0,  LengthUnit.FEET,        LengthUnit.YARDS);
-        demonstrateLengthConversion(2.54, LengthUnit.CENTIMETERS, LengthUnit.INCHES);
-        demonstrateLengthConversion(new QuantityLength(1.0, LengthUnit.YARDS), LengthUnit.FEET);
+        demonstrateConversion(new Quantity<>(1.0,  LengthUnit.FEET), LengthUnit.INCHES);
+        demonstrateConversion(new Quantity<>(24.0, LengthUnit.INCHES), LengthUnit.FEET);
+        demonstrateConversion(new Quantity<>(1.0,  LengthUnit.YARDS), LengthUnit.INCHES);
+        demonstrateConversion(new Quantity<>(6.0,  LengthUnit.FEET), LengthUnit.YARDS);
+        demonstrateConversion(new Quantity<>(2.54, LengthUnit.CENTIMETERS), LengthUnit.INCHES);
+        demonstrateConversion(new Quantity<>(1.0, LengthUnit.YARDS), LengthUnit.FEET);
 
-        System.out.println("\n--- UC6: Addition ---");
-        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.FEET),
-                                  new QuantityLength(2.0,  LengthUnit.FEET));     // 3.0 ft
-        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.FEET),
-                                  new QuantityLength(12.0, LengthUnit.INCHES));   // 2.0 ft
-        demonstrateLengthAddition(new QuantityLength(12.0, LengthUnit.INCHES),
-                                  new QuantityLength(1.0,  LengthUnit.FEET));     // 24.0 in
-        demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.YARDS),
-                                  new QuantityLength(3.0,  LengthUnit.FEET));     // 2.0 yd
-
+        System.out.println("\n--- UC6/UC7: Addition ---");
+        demonstrateAddition(new Quantity<>(1.0, LengthUnit.FEET), new Quantity<>(2.0, LengthUnit.FEET), LengthUnit.FEET);    // 3.0 ft
+        demonstrateAddition(new Quantity<>(1.0, LengthUnit.FEET), new Quantity<>(12.0, LengthUnit.INCHES), LengthUnit.FEET); // 2.0 ft
+        demonstrateAddition(new Quantity<>(12.0, LengthUnit.INCHES), new Quantity<>(1.0, LengthUnit.FEET), LengthUnit.INCHES); // 24.0 in
+        demonstrateAddition(new Quantity<>(1.0, LengthUnit.YARDS), new Quantity<>(3.0, LengthUnit.FEET), LengthUnit.YARDS);  // 2.0 yd
+        
         System.out.println("\n--- UC7: Addition with explicit target unit ---");
-        QuantityLength sum1 = new QuantityLength(1.0, LengthUnit.FEET)
-                .add(new QuantityLength(12.0, LengthUnit.INCHES), LengthUnit.INCHES);
-        System.out.println("1.0 FEET + 12.0 INCHES -> " + sum1);     // 24.0 INCHES
-        QuantityLength sum2 = new QuantityLength(2.0, LengthUnit.YARDS)
-                .add(new QuantityLength(3.0, LengthUnit.FEET), LengthUnit.FEET);
-        System.out.println("2.0 YARDS + 3.0 FEET -> " + sum2);       // 9.0 FEET
+        demonstrateAddition(new Quantity<>(1.0, LengthUnit.FEET), new Quantity<>(12.0, LengthUnit.INCHES), LengthUnit.INCHES); // 24.0 in
+        demonstrateAddition(new Quantity<>(2.0, LengthUnit.YARDS), new Quantity<>(3.0, LengthUnit.FEET), LengthUnit.FEET);     // 9.0 ft
 
         System.out.println("\n--- UC9: Weight ---");
-        demonstrateWeightEquality(new QuantityWeight(1.0, WeightUnit.KILOGRAM),
-                                  new QuantityWeight(1000.0, WeightUnit.GRAM));
-        demonstrateWeightConversion(1.0, WeightUnit.KILOGRAM, WeightUnit.GRAM);
-        demonstrateWeightAddition(new QuantityWeight(1.0, WeightUnit.KILOGRAM),
-                                  new QuantityWeight(1000.0, WeightUnit.GRAM));
-    }
-
-    public static boolean demonstrateWeightEquality(QuantityWeight w1, QuantityWeight w2) {
-        boolean result = w1.equals(w2);
-        System.out.println(w1 + " == " + w2 + " ? " + result);
-        return result;
-    }
-
-    public static QuantityWeight demonstrateWeightConversion(double value, WeightUnit from, WeightUnit to) {
-        QuantityWeight source = new QuantityWeight(value, from);
-        QuantityWeight converted = source.convertTo(to);
-        System.out.println(source + " => " + converted);
-        return converted;
-    }
-
-    public static QuantityWeight demonstrateWeightAddition(QuantityWeight w1, QuantityWeight w2) {
-        QuantityWeight result = w1.add(w2);
-        System.out.println(w1 + " + " + w2 + " = " + result);
-        return result;
+        demonstrateEquality(new Quantity<>(1.0, WeightUnit.KILOGRAM), new Quantity<>(1000.0, WeightUnit.GRAM));
+        demonstrateConversion(new Quantity<>(1.0, WeightUnit.KILOGRAM), WeightUnit.GRAM);
+        demonstrateAddition(new Quantity<>(1.0, WeightUnit.KILOGRAM), new Quantity<>(1000.0, WeightUnit.GRAM), WeightUnit.KILOGRAM);
     }
 }
 

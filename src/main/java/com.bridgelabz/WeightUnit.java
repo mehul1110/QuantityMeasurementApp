@@ -4,7 +4,7 @@ package com.bridgelabz;
  * Standalone enum representing weight units.
  * Each constant knows its conversion factor relative to KILOGRAM (the base unit).
  */
-public enum WeightUnit {
+public enum WeightUnit implements IMeasurable {
 
     KILOGRAM(1.0),
     GRAM(0.001),          // 1g = 0.001 kg
@@ -29,5 +29,9 @@ public enum WeightUnit {
     /** Convert a value expressed in the base unit (kilograms) to this unit. */
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / conversionFactor;
+    }
+
+    public String getUnitName() {
+        return this.name();
     }
 }

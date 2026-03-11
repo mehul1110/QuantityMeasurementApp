@@ -5,7 +5,7 @@ package com.bridgelabz;
  * Each constant knows its conversion factor relative to FEET (the base unit)
  * and can directly perform conversions — keeping all conversion math in one place.
  */
-public enum LengthUnit {
+public enum LengthUnit implements IMeasurable {
 
     FEET(1.0),
     INCHES(1.0 / 12.0),
@@ -31,5 +31,9 @@ public enum LengthUnit {
     /** Convert a value expressed in the base unit (feet) to this unit. */
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / conversionFactor;
+    }
+
+    public String getUnitName() {
+        return this.name();
     }
 }
