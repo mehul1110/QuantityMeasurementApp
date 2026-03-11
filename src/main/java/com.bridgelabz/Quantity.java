@@ -64,6 +64,11 @@ public class Quantity<U extends IMeasurable> {
 
     public Quantity<U> convertTo(U targetUnit) {
         if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+        if (this.unit instanceof TemperatureUnit) {
+            double celsius = this.unit.convertToBaseUnit(this.value);
+            double result = targetUnit.convertFromBaseUnit(celsius);
+            return new Quantity<>(roundToTwoDecimals(result), targetUnit);
+        }
         double base = unit.convertToBaseUnit(value);
         double result = targetUnit.convertFromBaseUnit(base);
         return new Quantity<>(roundToTwoDecimals(result), targetUnit);
@@ -81,6 +86,7 @@ public class Quantity<U extends IMeasurable> {
     }
 
     private double performBaseArithmetic(Quantity<U> other, ArithmeticOperation op) {
+        this.unit.validateOperationSupport(op.name());
         double base1 = this.unit.convertToBaseUnit(this.value);
         double base2 = other.unit.convertToBaseUnit(other.value);
         return op.compute(base1, base2);
