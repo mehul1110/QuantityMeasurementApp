@@ -76,6 +76,32 @@ public class QuantityMeasurementApp {
         QuantityLength sum2 = new QuantityLength(2.0, LengthUnit.YARDS)
                 .add(new QuantityLength(3.0, LengthUnit.FEET), LengthUnit.FEET);
         System.out.println("2.0 YARDS + 3.0 FEET -> " + sum2);       // 9.0 FEET
+
+        System.out.println("\n--- UC9: Weight ---");
+        demonstrateWeightEquality(new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                                  new QuantityWeight(1000.0, WeightUnit.GRAM));
+        demonstrateWeightConversion(1.0, WeightUnit.KILOGRAM, WeightUnit.GRAM);
+        demonstrateWeightAddition(new QuantityWeight(1.0, WeightUnit.KILOGRAM),
+                                  new QuantityWeight(1000.0, WeightUnit.GRAM));
+    }
+
+    public static boolean demonstrateWeightEquality(QuantityWeight w1, QuantityWeight w2) {
+        boolean result = w1.equals(w2);
+        System.out.println(w1 + " == " + w2 + " ? " + result);
+        return result;
+    }
+
+    public static QuantityWeight demonstrateWeightConversion(double value, WeightUnit from, WeightUnit to) {
+        QuantityWeight source = new QuantityWeight(value, from);
+        QuantityWeight converted = source.convertTo(to);
+        System.out.println(source + " => " + converted);
+        return converted;
+    }
+
+    public static QuantityWeight demonstrateWeightAddition(QuantityWeight w1, QuantityWeight w2) {
+        QuantityWeight result = w1.add(w2);
+        System.out.println(w1 + " + " + w2 + " = " + result);
+        return result;
     }
 }
 

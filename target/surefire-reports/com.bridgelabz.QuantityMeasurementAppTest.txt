@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bridgelabz.QuantityMeasurementAppTest
 -------------------------------------------------------------------------------
-Tests run: 65, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.340 s -- in com.bridgelabz.QuantityMeasurementAppTest
+Tests run: 82, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.303 s -- in com.bridgelabz.QuantityMeasurementAppTest
