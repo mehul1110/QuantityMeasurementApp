@@ -95,21 +95,33 @@ public class QuantityLength {
 
     /**
      * Adds another QuantityLength to this one.
-     * The result is expressed in THIS object's unit, rounded to 2 decimal places.
-     * Returns a NEW QuantityLength (immutable — originals unchanged).
-     *
-     * @param other the QuantityLength to add; must not be null
-     * @return new QuantityLength in this.unit
+     * Result is in THIS object's unit (delegates to add(other, this.unit)).
      */
     public QuantityLength add(QuantityLength other) {
+        return add(other, this.unit);
+    }
+
+    /**
+     * Adds another QuantityLength to this one, expressed in an explicit target unit.
+     * Returns a NEW QuantityLength (immutable — originals unchanged).
+     *
+     * @param other      the QuantityLength to add; must not be null and must be finite
+     * @param targetUnit the unit of the result; must not be null
+     * @return new QuantityLength in targetUnit, rounded to 2 decimal places
+     * @throws IllegalArgumentException if targetUnit is null, other is null, or other is non-finite
+     */
+    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+        if (targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+
         double baseSum = addToBaseUnit(other);                               // sum in feet
-        double result  = baseSum / this.unit.getConversionFactor();          // convert to this.unit
+        double result  = baseSum / targetUnit.getConversionFactor();         // convert to targetUnit
 
         // Round to 2 decimal places
         double factor = 100.0;
         result = Math.round(result * factor) / factor;
 
-        return new QuantityLength(result, this.unit);
+        return new QuantityLength(result, targetUnit);
     }
 }
 

@@ -380,6 +380,107 @@ class QuantityMeasurementAppTest {
                 .add(new QuantityLength(1e6, QuantityLength.LengthUnit.FEET));
         assertEquals(2e6, result.getValue(), 1e-6);
     }
+
+    // ─── UC7: ADDITION WITH EXPLICIT TARGET UNIT ─────────────────────────────────
+
+    // 1.0ft + 12.0in expressed in FEET = 2.0 ft
+    @Test
+    void testAddition_ExplicitTarget_Feet() {
+        QuantityLength result = new QuantityLength(1.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES),
+                        QuantityLength.LengthUnit.FEET);
+        assertEquals(2.0, result.getValue(), 1e-6);
+        assertEquals(QuantityLength.LengthUnit.FEET, result.getUnit());
+    }
+
+    // 1.0ft + 12.0in expressed in INCHES = 24.0 in
+    @Test
+    void testAddition_ExplicitTarget_Inches() {
+        QuantityLength result = new QuantityLength(1.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES),
+                        QuantityLength.LengthUnit.INCHES);
+        assertEquals(24.0, result.getValue(), 1e-6);
+        assertEquals(QuantityLength.LengthUnit.INCHES, result.getUnit());
+    }
+
+    // 1.0ft + 12.0in expressed in YARDS ≈ 0.67 yd
+    @Test
+    void testAddition_ExplicitTarget_Yards() {
+        QuantityLength result = new QuantityLength(1.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES),
+                        QuantityLength.LengthUnit.YARDS);
+        assertEquals(0.67, result.getValue(), 1e-2);
+        assertEquals(QuantityLength.LengthUnit.YARDS, result.getUnit());
+    }
+
+    // 2.0yd + 3.0ft expressed in YARDS = 3.0 yd
+    @Test
+    void testAddition_ExplicitTarget_SameAsFirst() {
+        QuantityLength result = new QuantityLength(2.0, QuantityLength.LengthUnit.YARDS)
+                .add(new QuantityLength(3.0, QuantityLength.LengthUnit.FEET),
+                        QuantityLength.LengthUnit.YARDS);
+        assertEquals(3.0, result.getValue(), 1e-6);
+        assertEquals(QuantityLength.LengthUnit.YARDS, result.getUnit());
+    }
+
+    // 2.0yd + 3.0ft expressed in FEET = 9.0 ft
+    @Test
+    void testAddition_ExplicitTarget_SameAsSecond() {
+        QuantityLength result = new QuantityLength(2.0, QuantityLength.LengthUnit.YARDS)
+                .add(new QuantityLength(3.0, QuantityLength.LengthUnit.FEET),
+                        QuantityLength.LengthUnit.FEET);
+        assertEquals(9.0, result.getValue(), 1e-6);
+        assertEquals(QuantityLength.LengthUnit.FEET, result.getUnit());
+    }
+
+    // Commutativity: base of (1ft +[YARDS] 12in) == base of (12in +[YARDS] 1ft)
+    @Test
+    void testAddition_ExplicitTarget_Commutativity() {
+        QuantityLength ab = new QuantityLength(1.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES),
+                        QuantityLength.LengthUnit.YARDS);
+        QuantityLength ba = new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES)
+                .add(new QuantityLength(1.0, QuantityLength.LengthUnit.FEET),
+                        QuantityLength.LengthUnit.YARDS);
+        assertEquals(ab.getValue() * ab.getUnit().getConversionFactor(),
+                     ba.getValue() * ba.getUnit().getConversionFactor(), 1e-6);
+    }
+
+    // 5.0ft + 0.0in in YARDS ≈ 1.667 yd
+    @Test
+    void testAddition_ExplicitTarget_WithZero() {
+        QuantityLength result = new QuantityLength(5.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(0.0, QuantityLength.LengthUnit.INCHES),
+                        QuantityLength.LengthUnit.YARDS);
+        assertEquals(5.0 / 3.0, result.getValue(), 1e-2);
+    }
+
+    // 5.0ft + (-2.0ft) in INCHES = 36.0 in
+    @Test
+    void testAddition_ExplicitTarget_NegativeValues() {
+        QuantityLength result = new QuantityLength(5.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(-2.0, QuantityLength.LengthUnit.FEET),
+                        QuantityLength.LengthUnit.INCHES);
+        assertEquals(36.0, result.getValue(), 1e-6);
+        assertEquals(QuantityLength.LengthUnit.INCHES, result.getUnit());
+    }
+
+    // null targetUnit → IllegalArgumentException
+    @Test
+    void testAddition_ExplicitTarget_NullTargetUnit_ThrowsException() {
+        QuantityLength l1 = new QuantityLength(1.0, QuantityLength.LengthUnit.FEET);
+        QuantityLength l2 = new QuantityLength(12.0, QuantityLength.LengthUnit.INCHES);
+        assertThrows(IllegalArgumentException.class, () -> l1.add(l2, null));
+    }
+
+    // 1000ft + 500ft expressed in INCHES = 18000.0 in
+    @Test
+    void testAddition_ExplicitTarget_LargeToSmall() {
+        QuantityLength result = new QuantityLength(1000.0, QuantityLength.LengthUnit.FEET)
+                .add(new QuantityLength(500.0, QuantityLength.LengthUnit.FEET),
+                        QuantityLength.LengthUnit.INCHES);
+        assertEquals(18000.0, result.getValue(), 1e-6);
+    }
 }
 
 

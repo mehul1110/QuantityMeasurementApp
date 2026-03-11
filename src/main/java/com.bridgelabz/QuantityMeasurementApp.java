@@ -68,5 +68,14 @@ public class QuantityMeasurementApp {
                                   new QuantityLength(1.0,  LengthUnit.FEET));     // 24.0 in
         demonstrateLengthAddition(new QuantityLength(1.0,  LengthUnit.YARDS),
                                   new QuantityLength(3.0,  LengthUnit.FEET));     // 2.0 yd
+
+        System.out.println("\n--- UC7: Addition with explicit target unit ---");
+        QuantityLength sum1 = new QuantityLength(1.0, LengthUnit.FEET)
+                .add(new QuantityLength(12.0, LengthUnit.INCHES), LengthUnit.INCHES);
+        System.out.println("1.0 FEET + 12.0 INCHES -> " + sum1);     // 24.0 INCHES
+        QuantityLength sum2 = new QuantityLength(2.0, LengthUnit.YARDS)
+                .add(new QuantityLength(3.0, LengthUnit.FEET), LengthUnit.FEET);
+        System.out.println("2.0 YARDS + 3.0 FEET -> " + sum2);       // 9.0 FEET
     }
-}
+}
+
