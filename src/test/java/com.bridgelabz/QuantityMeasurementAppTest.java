@@ -939,4 +939,25 @@ class QuantityMeasurementAppTest {
                 .divide(new Quantity<>(5.0, VolumeUnit.LITRE));
         assertEquals(2.0, result, 1e-6);
     }
+
+    // ─── UC13: CENTRALIZED ARITHMETIC TESTS ─────────────────────────────────────
+
+    @Test
+    void testValidation_NullOperand_AllOperations() {
+        Quantity<LengthUnit> q1 = new Quantity<>(10.0, LengthUnit.FEET);
+        assertThrows(IllegalArgumentException.class, () -> q1.add(null));
+        assertThrows(IllegalArgumentException.class, () -> q1.subtract(null));
+        assertThrows(IllegalArgumentException.class, () -> q1.divide(null));
+    }
+    
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    void testValidation_CrossCategory_AllOperations() {
+        Quantity l = new Quantity<>(10.0, LengthUnit.FEET);
+        Quantity w = new Quantity<>(5.0, WeightUnit.KILOGRAM);
+        assertThrows(IllegalArgumentException.class, () -> l.add(w));
+        assertThrows(IllegalArgumentException.class, () -> l.subtract(w));
+        assertThrows(IllegalArgumentException.class, () -> l.divide(w));
+    }
 }
+
