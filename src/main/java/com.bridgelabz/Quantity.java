@@ -61,6 +61,36 @@ public class Quantity<U extends IMeasurable> {
         return new Quantity<>(roundToTwoDecimals(result), targetUnit);
     }
 
+    public Quantity<U> subtract(Quantity<U> other) {
+        if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+        if (other.unit.getClass() != this.unit.getClass()) 
+            throw new IllegalArgumentException("Cannot subtract different categories");
+        if (!Double.isFinite(other.value)) throw new IllegalArgumentException("Value must be finite");
+        double base = unit.convertToBaseUnit(value) - other.unit.convertToBaseUnit(other.value);
+        double result = unit.convertFromBaseUnit(base);
+        return new Quantity<>(roundToTwoDecimals(result), this.unit);
+    }
+    
+    public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+        if (other == null || targetUnit == null) throw new IllegalArgumentException("Operand or target unit cannot be null");
+        if (other.unit.getClass() != this.unit.getClass()) 
+            throw new IllegalArgumentException("Cannot subtract different categories");
+        double base = unit.convertToBaseUnit(value) - other.unit.convertToBaseUnit(other.value);
+        double result = targetUnit.convertFromBaseUnit(base);
+        return new Quantity<>(roundToTwoDecimals(result), targetUnit);
+    }
+
+    public double divide(Quantity<U> other) {
+        if (other == null) throw new IllegalArgumentException("Operand cannot be null");
+        if (other.unit.getClass() != this.unit.getClass()) 
+            throw new IllegalArgumentException("Cannot divide different categories");
+        if (!Double.isFinite(other.value)) throw new IllegalArgumentException("Value must be finite");
+        double base1 = unit.convertToBaseUnit(value);
+        double base2 = other.unit.convertToBaseUnit(other.value);
+        if (base2 == 0.0) throw new ArithmeticException("Division by zero");
+        return base1 / base2;
+    }
+
     private double roundToTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;
     }

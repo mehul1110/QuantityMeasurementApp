@@ -20,6 +20,18 @@ public class QuantityMeasurementApp {
         return result;
     }
 
+    public static <U extends IMeasurable> Quantity<U> demonstrateSubtraction(Quantity<U> q1, Quantity<U> q2, U targetUnit) {
+        Quantity<U> result = q1.subtract(q2, targetUnit);
+        System.out.println(q1 + " - " + q2 + " = " + result);
+        return result;
+    }
+
+    public static <U extends IMeasurable> double demonstrateDivision(Quantity<U> q1, Quantity<U> q2) {
+        double result = q1.divide(q2);
+        System.out.println(q1 + " / " + q2 + " = " + result);
+        return result;
+    }
+
     public static void main(String[] args) {
         System.out.println("--- Equality checks ---");
         Quantity<LengthUnit> oneFoot      = new Quantity<>(1.0,  LengthUnit.FEET);
@@ -56,6 +68,11 @@ public class QuantityMeasurementApp {
         demonstrateEquality(new Quantity<>(1.0, VolumeUnit.LITRE), new Quantity<>(1000.0, VolumeUnit.MILLILITRE));
         demonstrateConversion(new Quantity<>(1.0, VolumeUnit.GALLON), VolumeUnit.LITRE);
         demonstrateAddition(new Quantity<>(1.0, VolumeUnit.LITRE), new Quantity<>(1000.0, VolumeUnit.MILLILITRE), VolumeUnit.LITRE);
+        System.out.println("\n--- UC12: Subtraction and Division ---");
+        demonstrateSubtraction(new Quantity<>(10.0, LengthUnit.FEET), new Quantity<>(5.0, LengthUnit.FEET), LengthUnit.FEET);
+        demonstrateSubtraction(new Quantity<>(10.0, LengthUnit.FEET), new Quantity<>(6.0, LengthUnit.INCHES), LengthUnit.INCHES);
+        demonstrateDivision(new Quantity<>(10.0, LengthUnit.FEET), new Quantity<>(2.0, LengthUnit.FEET));
+        demonstrateDivision(new Quantity<>(10.0, WeightUnit.KILOGRAM), new Quantity<>(5.0, WeightUnit.KILOGRAM));
     }
 }
 
