@@ -1,6 +1,6 @@
 package com.bridgelabz;
 
-import com.bridgelabz.QuantityLength.LengthUnit;
+import com.bridgelabz.LengthUnit;
 
 public class QuantityMeasurementApp {
 
