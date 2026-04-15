@@ -5,8 +5,11 @@ import com.bridgelabz.entity.QuantityMeasurementEntity;
 import com.bridgelabz.exception.QuantityMeasurementException;
 import com.bridgelabz.model.*;
 import com.bridgelabz.repository.IQuantityMeasurementRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuantityMeasurementServiceImpl implements IQuantityMeasurementService {
+    private static final Logger log = LoggerFactory.getLogger(QuantityMeasurementServiceImpl.class);
     private final IQuantityMeasurementRepository repository;
 
     public QuantityMeasurementServiceImpl(IQuantityMeasurementRepository repository) {
@@ -61,6 +64,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             repository.save(new QuantityMeasurementEntity("COMPARE", q1.toString(), q2.toString(), String.valueOf(isEqual)));
             return result;
         } catch (Exception e) {
+            log.error("Comparison failed: {}", e.getMessage());
             repository.save(new QuantityMeasurementEntity("COMPARE", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
             throw new QuantityMeasurementException(e.getMessage(), e);
         }
@@ -79,13 +83,13 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             Quantity<IMeasurable> quantity = new Quantity<>(sModel.getValue(), sModel.getUnit());
             Quantity<IMeasurable> converted = quantity.convertTo(tModel.getUnit());
 
-            // Need to find the correct DTO unit to return
             QuantityDTO.IMeasurableUnit dtoUnit = target.getUnit();
             QuantityDTO result = new QuantityDTO(converted.getValue(), dtoUnit);
             
             repository.save(new QuantityMeasurementEntity("CONVERT", source.toString(), result.toString()));
             return result;
         } catch (Exception e) {
+            log.error("Conversion failed: {}", e.getMessage());
             repository.save(new QuantityMeasurementEntity("CONVERT", String.valueOf(source), null, e.getMessage(), true));
             throw new QuantityMeasurementException(e.getMessage(), e);
         }
@@ -112,10 +116,8 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             
             repository.save(new QuantityMeasurementEntity("ADD", q1.toString(), q2.toString(), result.toString()));
             return result;
-        } catch (UnsupportedOperationException e) {
-            repository.save(new QuantityMeasurementEntity("ADD", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
-            throw new QuantityMeasurementException(e.getMessage(), e);
         } catch (Exception e) {
+            log.error("Addition failed: {}", e.getMessage());
             repository.save(new QuantityMeasurementEntity("ADD", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
             throw new QuantityMeasurementException(e.getMessage(), e);
         }
@@ -142,10 +144,8 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             
             repository.save(new QuantityMeasurementEntity("SUBTRACT", q1.toString(), q2.toString(), result.toString()));
             return result;
-        } catch (UnsupportedOperationException e) {
-            repository.save(new QuantityMeasurementEntity("SUBTRACT", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
-            throw new QuantityMeasurementException(e.getMessage(), e);
         } catch (Exception e) {
+            log.error("Subtraction failed: {}", e.getMessage());
             repository.save(new QuantityMeasurementEntity("SUBTRACT", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
             throw new QuantityMeasurementException(e.getMessage(), e);
         }
@@ -170,6 +170,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             repository.save(new QuantityMeasurementEntity("DIVIDE", q1.toString(), q2.toString(), String.valueOf(ratio)));
             return result;
         } catch (Exception e) {
+            log.error("Division failed: {}", e.getMessage());
             repository.save(new QuantityMeasurementEntity("DIVIDE", String.valueOf(q1), String.valueOf(q2), e.getMessage(), true));
             throw new QuantityMeasurementException(e.getMessage(), e);
         }

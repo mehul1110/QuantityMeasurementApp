@@ -55,6 +55,7 @@ public class QuantityMeasurementEntity implements Serializable {
     public boolean isHasError() { return hasError; }
     public String getErrorMessage() { return errorMessage; }
     public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     @Override
     public String toString() {

@@ -3,8 +3,11 @@ package com.bridgelabz.controller;
 import com.bridgelabz.dto.QuantityDTO;
 import com.bridgelabz.exception.QuantityMeasurementException;
 import com.bridgelabz.service.IQuantityMeasurementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuantityMeasurementController {
+    private static final Logger log = LoggerFactory.getLogger(QuantityMeasurementController.class);
     private final IQuantityMeasurementService service;
 
     public QuantityMeasurementController(IQuantityMeasurementService service) {
@@ -15,57 +18,35 @@ public class QuantityMeasurementController {
     }
 
     public void performComparison(QuantityDTO q1, QuantityDTO q2) {
-        System.out.println("\n--- Performing Comparison ---");
-        System.out.println("Input: " + q1 + " vs " + q2);
         try {
             QuantityDTO result = service.compare(q1, q2);
             boolean isEqual = result.getValue() == 1.0;
+            System.out.println("Input: " + q1 + " vs " + q2);
             System.out.println("Result: " + (isEqual ? "EQUAL" : "NOT EQUAL"));
         } catch (QuantityMeasurementException e) {
+            log.warn("Comparison failed: {}", e.getMessage());
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-    public void performConversion(QuantityDTO source, QuantityDTO targetUnit) {
-        System.out.println("\n--- Performing Conversion ---");
-        System.out.println("Input: Convert " + source + " to " + targetUnit.getUnit());
+    public void performConversion(QuantityDTO source, QuantityDTO target) {
         try {
-            QuantityDTO result = service.convert(source, targetUnit);
+            QuantityDTO result = service.convert(source, target);
+            System.out.println("Input: Convert " + source + " to " + target.getUnitName());
             System.out.println("Result: " + result);
         } catch (QuantityMeasurementException e) {
+            log.warn("Conversion failed: {}", e.getMessage());
             System.out.println("Error: " + e.getMessage());
         }
     }
 
     public void performAddition(QuantityDTO q1, QuantityDTO q2, QuantityDTO targetUnit) {
-        System.out.println("\n--- Performing Addition ---");
-        System.out.println("Input: " + q1 + " + " + q2 + " in " + targetUnit.getUnit());
         try {
             QuantityDTO result = service.add(q1, q2, targetUnit);
+            System.out.println("Input: " + q1 + " + " + q2 + " in " + targetUnit.getUnitName());
             System.out.println("Result: " + result);
         } catch (QuantityMeasurementException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void performSubtraction(QuantityDTO q1, QuantityDTO q2, QuantityDTO targetUnit) {
-        System.out.println("\n--- Performing Subtraction ---");
-        System.out.println("Input: " + q1 + " - " + q2 + " in " + targetUnit.getUnit());
-        try {
-            QuantityDTO result = service.subtract(q1, q2, targetUnit);
-            System.out.println("Result: " + result);
-        } catch (QuantityMeasurementException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    public void performDivision(QuantityDTO q1, QuantityDTO q2) {
-        System.out.println("\n--- Performing Division ---");
-        System.out.println("Input: " + q1 + " / " + q2);
-        try {
-            QuantityDTO result = service.divide(q1, q2);
-            System.out.println("Result: Scalar ratio = " + result.getValue());
-        } catch (QuantityMeasurementException e) {
+            log.warn("Addition failed: {}", e.getMessage());
             System.out.println("Error: " + e.getMessage());
         }
     }

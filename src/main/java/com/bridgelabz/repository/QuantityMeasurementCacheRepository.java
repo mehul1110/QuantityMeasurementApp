@@ -1,11 +1,15 @@
 package com.bridgelabz.repository;
 
 import com.bridgelabz.entity.QuantityMeasurementEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QuantityMeasurementCacheRepository implements IQuantityMeasurementRepository {
+    private static final Logger log = LoggerFactory.getLogger(QuantityMeasurementCacheRepository.class);
     private static QuantityMeasurementCacheRepository instance;
     private final List<QuantityMeasurementEntity> cache;
     private static final String FILE_NAME = "quantity_measurements.ser";
@@ -39,8 +43,9 @@ public class QuantityMeasurementCacheRepository implements IQuantityMeasurementR
         try (FileOutputStream fos = new FileOutputStream(file, append);
              ObjectOutputStream oos = append ? new AppendableObjectOutputStream(fos) : new ObjectOutputStream(fos)) {
             oos.writeObject(entity);
+            log.info("Saved measurement to cache file: {}", entity.getOperationType());
         } catch (IOException e) {
-            System.err.println("Warning: Could not save to disk. " + e.getMessage());
+            log.error("Could not save to disk: {}", e.getMessage());
         }
     }
 
@@ -58,8 +63,9 @@ public class QuantityMeasurementCacheRepository implements IQuantityMeasurementR
                     break;
                 }
             }
+            log.info("Loaded {} measurements from cache file", cache.size());
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Warning: Could not load from disk. History might be incomplete. " + e.getMessage());
+            log.warn("Could not load from disk. History might be incomplete: {}", e.getMessage());
         }
     }
 
