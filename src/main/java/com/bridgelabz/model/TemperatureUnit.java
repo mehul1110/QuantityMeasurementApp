@@ -1,4 +1,4 @@
-package com.bridgelabz;
+package com.bridgelabz.model;
 
 import java.util.function.Function;
 
@@ -10,13 +10,14 @@ public enum TemperatureUnit implements IMeasurable {
     FAHRENHEIT(
         fahrenheit -> (fahrenheit - 32) * 5.0/9.0,   // F to C
         celsius -> celsius * 9.0/5.0 + 32             // C to F
+    ),
+    KELVIN(
+        kelvin -> kelvin - 273.15,                   // K to C
+        celsius -> celsius + 273.15                  // C to K
     );
     
     private final Function<Double, Double> toCelsius;
     private final Function<Double, Double> fromCelsius;
-    
-    // Lambda: temperature does NOT support arithmetic
-    private final SupportsArithmetic supportsArithmetic = () -> false;
     
     TemperatureUnit(Function<Double,Double> toCelsius, 
                     Function<Double,Double> fromCelsius) {
@@ -51,5 +52,13 @@ public enum TemperatureUnit implements IMeasurable {
         throw new UnsupportedOperationException(
             "Temperature does not support " + operationName + 
             ". Temperature arithmetic is not physically meaningful.");
+    }
+
+    @Override
+    public String getMeasurementType() { return "TEMPERATURE"; }
+
+    @Override
+    public IMeasurable getUnitByName(String unitName) {
+        return TemperatureUnit.valueOf(unitName.toUpperCase());
     }
 }

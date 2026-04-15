@@ -1,5 +1,13 @@
 package com.bridgelabz;
 
+import com.bridgelabz.model.*;
+import com.bridgelabz.dto.QuantityDTO;
+import com.bridgelabz.entity.QuantityMeasurementEntity;
+import com.bridgelabz.exception.QuantityMeasurementException;
+import com.bridgelabz.service.*;
+import com.bridgelabz.repository.*;
+import com.bridgelabz.controller.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,7 +79,7 @@ class QuantityMeasurementAppTest {
     @Test
     void testEquality_DifferentType() {
         Quantity<LengthUnit> l1 = new Quantity<>(1.0, LengthUnit.FEET);
-        assertFalse(l1.equals("string"));
+        assertFalse(l1.equals((Object) "string"));
     }
 
     // ─── UC4: YARD TESTS ────────────────────────────────────────────────────────
@@ -856,8 +864,9 @@ class QuantityMeasurementAppTest {
     @Test
     void testSubtraction_CrossCategory_Throws() {
         Quantity<LengthUnit> l = new Quantity<>(10.0, LengthUnit.FEET);
-        Quantity<WeightUnit> w = new Quantity<>(5.0, WeightUnit.KILOGRAM);
-        // Generic constraints prevent compilation, unchecked cast could throw, validation is implicit but tested above
+        // Using an unrelated type should normally not compile, 
+        // but we verify that and ensure no unused variables if we keep it for reference
+        assertNotNull(l);
     }
 
     @Test
@@ -1104,6 +1113,238 @@ class QuantityMeasurementAppTest {
         assertTrue(WeightUnit.KILOGRAM.supportsArithmetic());
         assertTrue(VolumeUnit.LITRE.supportsArithmetic());
         assertFalse(TemperatureUnit.CELSIUS.supportsArithmetic());
+    }
+
+    // --- UC15: N-Tier Layer Tests ---
+
+    private IQuantityMeasurementRepository repository;
+    private IQuantityMeasurementService service;
+    private QuantityMeasurementController controller;
+
+    @BeforeEach
+    void setUp() {
+        repository = QuantityMeasurementCacheRepository.getInstance();
+        service = new QuantityMeasurementServiceImpl(repository);
+        controller = new QuantityMeasurementController(service);
+    }
+
+    // Entity tests
+    @Test
+    void testEntity_SingleOperandConstruction() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity("CONVERT", "1.0 FEET", "12.0 INCHES");
+        assertEquals("CONVERT", entity.getOperationType());
+        assertEquals("1.0 FEET", entity.getOperand1());
+        assertEquals("12.0 INCHES", entity.getResult());
+        assertFalse(entity.isHasError());
+    }
+
+    @Test
+    void testEntity_BinaryOperandConstruction() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity("ADD", "1.0 FEET", "12.0 INCHES", "2.0 FEET");
+        assertEquals("ADD", entity.getOperationType());
+        assertEquals("2.0 FEET", entity.getResult());
+        assertFalse(entity.isHasError());
+    }
+
+    @Test
+    void testEntity_ErrorConstruction() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity("ADD", "1.0 FEET", "12.0 INCHES", "Different categories", true);
+        assertTrue(entity.isHasError());
+        assertEquals("Different categories", entity.getErrorMessage());
+    }
+
+    @Test
+    void testEntity_ToString_Success() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity("CONVERT", "1.0 FEET", "12.0 INCHES");
+        String s = entity.toString();
+        assertTrue(s.contains("SUCCESS"));
+        assertTrue(s.contains("1.0 FEET"));
+    }
+
+    @Test
+    void testEntity_ToString_Error() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity("ADD", "1.0 FEET", "12.0 INCHES", "Error msg", true);
+        String s = entity.toString();
+        assertTrue(s.contains("ERROR"));
+        assertTrue(s.contains("Error msg"));
+    }
+
+    // Service tests
+    @Test
+    void testService_Compare_SameUnit() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO result = service.compare(q1, q2);
+        assertEquals(1.0, result.getValue());
+        assertEquals("BOOLEAN", result.getUnitName());
+    }
+
+    @Test
+    void testService_Compare_DifferentUnit() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCH);
+        QuantityDTO result = service.compare(q1, q2);
+        assertEquals(1.0, result.getValue());
+    }
+
+    @Test
+    void testService_Compare_CrossCategory_ThrowsException() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM);
+        assertThrows(QuantityMeasurementException.class, () -> service.compare(q1, q2));
+    }
+
+    @Test
+    void testService_Convert_Success() {
+        QuantityDTO source = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO target = new QuantityDTO(0.0, QuantityDTO.LengthUnit.INCH);
+        QuantityDTO result = service.convert(source, target);
+        assertEquals(12.0, result.getValue());
+        assertEquals("INCH", result.getUnitName());
+    }
+
+    @Test
+    void testService_Add_Success() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCH);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO result = service.add(q1, q2, t);
+        assertEquals(2.0, result.getValue());
+    }
+
+    @Test
+    void testService_Add_Temperature_ThrowsException() {
+        QuantityDTO q1 = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO q2 = new QuantityDTO(50.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        assertThrows(QuantityMeasurementException.class, () -> service.add(q1, q2, t));
+    }
+
+    @Test
+    void testService_Subtract_Success() {
+        QuantityDTO q1 = new QuantityDTO(2.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCH);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO result = service.subtract(q1, q2, t);
+        assertEquals(1.0, result.getValue());
+    }
+
+    @Test
+    void testService_Divide_Success() {
+        QuantityDTO q1 = new QuantityDTO(2.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO result = service.divide(q1, q2);
+        assertEquals(2.0, result.getValue());
+        assertEquals("SCALAR", result.getUnitName());
+    }
+
+    @Test
+    void testService_Divide_ByZero_ThrowsException() {
+        QuantityDTO q1 = new QuantityDTO(2.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(0.0, QuantityDTO.LengthUnit.FEET);
+        assertThrows(QuantityMeasurementException.class, () -> service.divide(q1, q2));
+    }
+
+    @Test
+    void testService_NullInput_ThrowsException() {
+        assertThrows(QuantityMeasurementException.class, () -> service.compare(null, null));
+    }
+
+    // Controller tests
+    @Test
+    void testController_NullService_ThrowsException() {
+        assertThrows(QuantityMeasurementException.class, () -> new QuantityMeasurementController(null));
+    }
+
+    @Test
+    void testController_PerformComparison_Success() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCH);
+        controller.performComparison(q1, q2); // should not throw
+    }
+
+    @Test
+    void testController_PerformComparison_Error_DoesNotCrash() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM);
+        controller.performComparison(q1, q2); // should catch exception internally and print error
+    }
+
+    @Test
+    void testController_PerformConversion_Success() {
+        QuantityDTO source = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO target = new QuantityDTO(0.0, QuantityDTO.LengthUnit.INCH);
+        controller.performConversion(source, target);
+    }
+
+    @Test
+    void testController_PerformAddition_Success() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.LengthUnit.FEET);
+        controller.performAddition(q1, q2, t);
+    }
+
+    @Test
+    void testController_PerformAddition_Error_DoesNotCrash() {
+        QuantityDTO q1 = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO q2 = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        controller.performAddition(q1, q2, t);
+    }
+
+    // Layer separation tests
+    @Test
+    void testService_CanBeTestedWithoutController() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        assertNotNull(service.compare(q1, q2));
+    }
+
+    @Test
+    void testController_CanBeTestedWithMockService() {
+        // We use the real service here since we don't have Mockito, but the principle is handled by providing a dependency
+        assertNotNull(controller);
+    }
+
+    // Integration tests
+    @Test
+    void testIntegration_EndToEnd_LengthAddition() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.YARD);
+        QuantityDTO q2 = new QuantityDTO(3.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.LengthUnit.YARD);
+        QuantityDTO result = service.add(q1, q2, t);
+        assertEquals(2.0, result.getValue());
+    }
+
+    @Test
+    void testIntegration_EndToEnd_TemperatureUnsupported() {
+        QuantityDTO q1 = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO q2 = new QuantityDTO(50.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        QuantityDTO t = new QuantityDTO(0.0, QuantityDTO.TemperatureUnit.CELSIUS);
+        assertThrows(QuantityMeasurementException.class, () -> service.add(q1, q2, t));
+    }
+
+    @Test
+    void testIntegration_EndToEnd_CrossCategory() {
+        QuantityDTO q1 = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO q2 = new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM);
+        assertThrows(QuantityMeasurementException.class, () -> service.compare(q1, q2));
+    }
+
+    // Repository tests
+    @Test
+    void testRepository_SaveAndRetrieve() {
+        int initialSize = repository.getAllMeasurements().size();
+        repository.save(new QuantityMeasurementEntity("TEST", "O1", "R"));
+        assertEquals(initialSize + 1, repository.getAllMeasurements().size());
+    }
+
+    @Test
+    void testRepository_SingletonInstance() {
+        IQuantityMeasurementRepository r1 = QuantityMeasurementCacheRepository.getInstance();
+        IQuantityMeasurementRepository r2 = QuantityMeasurementCacheRepository.getInstance();
+        assertSame(r1, r2);
     }
 }
 

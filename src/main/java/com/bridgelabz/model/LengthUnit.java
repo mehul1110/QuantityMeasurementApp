@@ -1,4 +1,4 @@
-package com.bridgelabz;
+package com.bridgelabz.model;
 
 /**
  * Standalone enum representing length units.
@@ -9,8 +9,12 @@ public enum LengthUnit implements IMeasurable {
 
     FEET(1.0),
     INCHES(1.0 / 12.0),
+    INCH(1.0 / 12.0),
     YARDS(3.0),
-    CENTIMETERS(1.0 / 30.48);   // 1 cm = 1/30.48 feet
+    YARD(3.0),
+    CENTIMETERS(1.0 / 30.48),
+    CENTIMETER(1.0 / 30.48),
+    METER(1.0 / 0.3048); // 1 meter ≈ 3.28084 feet
 
     private final double conversionFactor;
 
@@ -35,5 +39,13 @@ public enum LengthUnit implements IMeasurable {
 
     public String getUnitName() {
         return this.name();
+    }
+
+    @Override
+    public String getMeasurementType() { return "LENGTH"; }
+
+    @Override
+    public IMeasurable getUnitByName(String unitName) {
+        return LengthUnit.valueOf(unitName.toUpperCase());
     }
 }

@@ -1,4 +1,4 @@
-package com.bridgelabz;
+package com.bridgelabz.model;
 
 /**
  * Standalone enum representing weight units.
@@ -7,8 +7,10 @@ package com.bridgelabz;
 public enum WeightUnit implements IMeasurable {
 
     KILOGRAM(1.0),
-    GRAM(0.001),          // 1g = 0.001 kg
-    POUND(0.453592);      // 1 lb ≈ 0.453592 kg
+    GRAM(0.001),
+    POUND(0.453592),
+    OUNCE(0.453592 / 16.0), // 1 lb = 16 oz
+    TONNE(1000.0);
 
     private final double conversionFactor;
 
@@ -33,5 +35,13 @@ public enum WeightUnit implements IMeasurable {
 
     public String getUnitName() {
         return this.name();
+    }
+
+    @Override
+    public String getMeasurementType() { return "WEIGHT"; }
+
+    @Override
+    public IMeasurable getUnitByName(String unitName) {
+        return WeightUnit.valueOf(unitName.toUpperCase());
     }
 }

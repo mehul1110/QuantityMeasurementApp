@@ -1,4 +1,4 @@
-package com.bridgelabz;
+package com.bridgelabz.model;
 
 public interface IMeasurable {
     double getConversionFactor();
@@ -20,4 +20,7 @@ public interface IMeasurable {
     default void validateOperationSupport(String operationName) {
         // default: all operations supported, do nothing
     }
+
+    String getMeasurementType();
+    IMeasurable getUnitByName(String unitName);
 }
