@@ -1,28 +1,117 @@
-# Maven target folder
+# ============================================================
+# Maven
+# ============================================================
 /target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
 
-# Logs
+# ============================================================
+# Logs & runtime files
+# ============================================================
 *.log
+*.log.*
+logs/
 
-# OS files
+# ============================================================
+# Database files
+# ============================================================
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+*.mv.db
+*.trace.db
+
+# ============================================================
+# PDF / Office / Media (no binaries in source control)
+# ============================================================
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ============================================================
+# OS generated files
+# ============================================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# IntelliJ
+# ============================================================
+# IDE — IntelliJ IDEA
+# ============================================================
 .idea/
 *.iml
+*.iws
+*.ipr
+out/
 
-# VS Code
+# ============================================================
+# IDE — VS Code
+# ============================================================
 .vscode/
+*.code-workspace
 
-# Eclipse
+# ============================================================
+# IDE — Eclipse / STS
+# ============================================================
 .project
 .classpath
 .settings/
+.factorypath
+*.launch
 
-# Maven wrapper (optional — keep if team wants)
-.mvn/wrapper/maven-wrapper.jar
+# ============================================================
+# IDE — NetBeans
+# ============================================================
+nbproject/
+nb-configuration.xml
+nbbuild/
+dist/
+nbdist/
 
-# Compiled class files
+# ============================================================
+# Java
+# ============================================================
 *.class
+hs_err_pid*
+replay_pid*
+
+# ============================================================
+# Spring Boot
+# ============================================================
+# Local application-*.properties overrides (never commit secrets)
+application-local.properties
+application-secret.properties
+*-secret.properties
+
+# ============================================================
+# Project-specific
+# ============================================================
+# Dump folder (legacy code moved here during UC17 migration)
 dump/
+
+# Temp / scratch files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+wtrh.txt
