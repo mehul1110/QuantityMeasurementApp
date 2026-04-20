@@ -76,6 +76,18 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring AOP: enables @Aspect LoggingAspect -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- Jackson XML: content negotiation (JSON + XML) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+
         <!-- ===== API Documentation ===== -->
 
         <!-- SpringDoc OpenAPI / Swagger UI -->

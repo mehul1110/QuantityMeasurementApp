@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +27,11 @@ import java.util.List;
  * - No main() method — Spring Boot handles application startup.
  */
 @RestController
-@RequestMapping("/api/v1/quantities")
-@Tag(name = "Quantity Measurements", description = "REST API for quantity measurement operations")
+@RequestMapping(
+        value = "/api/v1/quantities",
+        produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+)
+@Tag(name = "Quantity Measurements", description = "REST API for quantity measurement operations — supports JSON and XML")
 public class QuantityMeasurementController {
 
     private static final Logger log = LoggerFactory.getLogger(QuantityMeasurementController.class);

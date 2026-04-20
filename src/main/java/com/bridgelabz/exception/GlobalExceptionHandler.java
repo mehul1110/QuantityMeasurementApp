@@ -13,20 +13,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 
 /**
- * UC17: Global Exception Handler for REST Controllers.
+ * UC17: Global Exception Handler.
  *
- * Uses @ControllerAdvice to intercept exceptions thrown by any controller
- * and returns consistent, structured error responses using ErrorResponse.
+ * @ControllerAdvice — intercepts exceptions from ALL @RestController classes.
+ * All error responses follow the consistent ErrorResponse structure.
  *
- * Handles three levels of exceptions:
- * 1. handleMethodArgumentNotValidException — Bean Validation errors (400)
- * 2. handleQuantityException              — Domain-specific errors (400)
- * 3. handleGlobalException                — Any unhandled exception (500)
+ * Three levels handled:
+ *  1. MethodArgumentNotValidException — Bean Validation failures (@Valid)  → 400
+ *  2. QuantityMeasurementException   — Domain / business rule violations   → 400
+ *  3. Exception                      — Any unexpected runtime error         → 500
  *
  * Benefits:
- * - Separates error handling logic from controller code (SRP).
- * - Clients receive consistent and informative error messages.
- * - Avoids verbose stack traces reaching the API consumer.
+ * - Controllers stay clean — no try/catch for HTTP error mapping
+ * - Clients get consistent, structured error messages across all endpoints
+ * - Logging is centralised here, not scattered across controllers
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,56 +34,58 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * Handles validation errors thrown when request body fails @Valid / Bean Validation constraints.
+     * Handles Bean Validation failures thrown when @Valid on @RequestBody fails.
      *
-     * Triggered when @Valid on @RequestBody fails (e.g., invalid unit name,
-     * missing required fields, @AssertTrue returns false).
+     * Message format: "fieldName: validation message"
+     * (e.g., "thatQuantityDTO.unit: Unit cannot be empty")
      *
-     * @param ex      the MethodArgumentNotValidException containing binding result
-     * @param request the incoming HTTP request
-     * @return 400 Bad Request with field-level error details
+     * @param ex      MethodArgumentNotValidException from Spring Validation
+     * @param request the incoming HTTP request (provides URI for path field)
+     * @return 400 Bad Request with validation error details
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
 
-        // Extract the first field error message, or a generic message
-        String message = ex.getBindingResult().getAllErrors().stream()
-                .filter(error -> error instanceof FieldError)
-                .map(error -> ((FieldError) error).getDefaultMessage())
+        // Format: "fieldName: message" — gives the client exactly which field failed and why
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(f -> f.getField() + ": " + f.getDefaultMessage())
                 .findFirst()
-                .orElse(ex.getBindingResult().getAllErrors().stream()
-                        .map(error -> error.getDefaultMessage())
+                .orElseGet(() -> ex.getBindingResult().getAllErrors()
+                        .stream()
+                        .map(e -> e.getDefaultMessage())
                         .findFirst()
                         .orElse("Validation failed"));
 
-        // Use field name as path for field errors, or "quantityInputDTO" for object-level errors
-        String path = ex.getBindingResult().getAllErrors().stream()
-                .filter(error -> error instanceof FieldError)
-                .map(error -> ((FieldError) error).getField())
+        // Path = failed field name for field errors, or request URI for object-level errors
+        String path = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(FieldError::getField)
                 .findFirst()
-                .orElse("quantityInputDTO");
+                .orElse(request.getRequestURI());
 
-        log.warn("Validation error on {}: {}", path, message);
+        log.warn("Validation error [{}] on path [{}]: {}", request.getMethod(), path, message);
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Quantity Measurement Error",
+                "Bad Request",
                 message,
                 path
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     /**
-     * Handles domain-specific exceptions from the service layer.
+     * Handles domain-specific business exceptions from the service layer.
      *
-     * Triggered by QuantityMeasurementException (e.g., incompatible measurement types,
-     * invalid operation, or domain rule violations).
+     * Examples: incompatible measurement types, invalid unit names,
+     * temperature arithmetic attempted, unknown measurement type.
      *
-     * @param ex      the QuantityMeasurementException
+     * @param ex      QuantityMeasurementException with business rule message
      * @param request the incoming HTTP request
      * @return 400 Bad Request with domain error details
      */
@@ -92,7 +94,7 @@ public class GlobalExceptionHandler {
             QuantityMeasurementException ex,
             HttpServletRequest request) {
 
-        log.warn("Quantity measurement error on {}: {}", request.getRequestURI(), ex.getMessage());
+        log.warn("Domain error [{}] on [{}]: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
@@ -105,21 +107,21 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Catch-all handler for any other unexpected exceptions.
+     * Catch-all: handles any unexpected exception not caught by the above handlers.
      *
-     * Provides a generic Internal Server Error response, preventing
-     * sensitive stack trace information from leaking to the client.
+     * Returns a generic 500 response. Stack trace is logged server-side
+     * but NOT exposed to the API consumer (security best practice).
      *
      * @param ex      the unhandled Exception
      * @param request the incoming HTTP request
-     * @return 500 Internal Server Error with generic error details
+     * @return 500 Internal Server Error
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex,
             HttpServletRequest request) {
 
-        log.error("Unexpected error on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        log.error("Unexpected error [{}] on [{}]: {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
