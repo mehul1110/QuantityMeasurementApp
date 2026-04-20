@@ -25,3 +25,4 @@ Thumbs.db
 
 # Compiled class files
 *.class
+dump/

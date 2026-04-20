@@ -1,60 +1,74 @@
 package com.bridgelabz.dto;
 
+import com.bridgelabz.model.LengthUnit;
+import com.bridgelabz.model.TemperatureUnit;
+import com.bridgelabz.model.VolumeUnit;
+import com.bridgelabz.model.WeightUnit;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
+/**
+ * UC17: Refactored QuantityDTO with String-based unit and measurementType fields.
+ *
+ * Used in API requests to represent a single quantity.
+ * Replaces the inner-enum approach from UC16.
+ */
 public class QuantityDTO {
 
-    // Inner interface — completely separate from the app's IMeasurable
-    public interface IMeasurableUnit {
-        String getMeasurementType();
-        String getUnitName();
-    }
+    @NotNull(message = "Value cannot be null")
+    private Double value;
 
-    // Inner enums implementing IMeasurableUnit
-    public enum LengthUnit implements IMeasurableUnit {
-        INCH, FEET, YARD, CENTIMETER, METER;
-        @Override public String getMeasurementType() { return "LENGTH"; }
-        @Override public String getUnitName() { return this.name(); }
-    }
+    @NotEmpty(message = "Unit cannot be empty")
+    private String unit;
 
-    public enum WeightUnit implements IMeasurableUnit {
-        GRAM, KILOGRAM, POUND, OUNCE, TONNE;
-        @Override public String getMeasurementType() { return "WEIGHT"; }
-        @Override public String getUnitName() { return this.name(); }
-    }
+    @NotEmpty(message = "Measurement type cannot be empty")
+    @Pattern(
+            regexp = "LengthUnit|WeightUnit|VolumeUnit|TemperatureUnit",
+            message = "Measurement type must be one of: LengthUnit, WeightUnit, VolumeUnit, TemperatureUnit"
+    )
+    private String measurementType;
 
-    public enum VolumeUnit implements IMeasurableUnit {
-        MILLILITER, LITER, GALLON, CUP;
-        @Override public String getMeasurementType() { return "VOLUME"; }
-        @Override public String getUnitName() { return this.name(); }
-    }
+    public QuantityDTO() {}
 
-    public enum TemperatureUnit implements IMeasurableUnit {
-        CELSIUS, FAHRENHEIT, KELVIN;
-        @Override public String getMeasurementType() { return "TEMPERATURE"; }
-        @Override public String getUnitName() { return this.name(); }
-    }
-
-    public enum ResultUnit implements IMeasurableUnit {
-        BOOLEAN, SCALAR;
-        @Override public String getMeasurementType() { return "RESULT"; }
-        @Override public String getUnitName() { return this.name(); }
-    }
-
-    // Fields
-    private final double value;
-    private final IMeasurableUnit unit;
-
-    // Constructor
-    public QuantityDTO(double value, IMeasurableUnit unit) {
+    public QuantityDTO(Double value, String unit, String measurementType) {
         this.value = value;
         this.unit = unit;
+        this.measurementType = measurementType;
     }
 
-    // Getters
-    public double getValue() { return value; }
-    public IMeasurableUnit getUnit() { return unit; }
-    public String getUnitName() { return unit.getUnitName(); }
-    public String getMeasurementType() { return unit.getMeasurementType(); }
+    /**
+     * Cross-field validation: ensures unit is valid for the given measurementType.
+     * @AssertTrue — Bean Validation calls this; if false, raises a validation error.
+     */
+    @AssertTrue(message = "Unit must be valid for the specified measurement type")
+    public boolean isUnitValidForMeasurementType() {
+        if (unit == null || measurementType == null) return true;
+        try {
+            switch (measurementType) {
+                case "LengthUnit":      LengthUnit.valueOf(unit.toUpperCase());      return true;
+                case "WeightUnit":      WeightUnit.valueOf(unit.toUpperCase());      return true;
+                case "VolumeUnit":      VolumeUnit.valueOf(unit.toUpperCase());      return true;
+                case "TemperatureUnit": TemperatureUnit.valueOf(unit.toUpperCase()); return true;
+                default:                return false;
+            }
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Double getValue() { return value; }
+    public void setValue(Double value) { this.value = value; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
+
+    public String getMeasurementType() { return measurementType; }
+    public void setMeasurementType(String measurementType) { this.measurementType = measurementType; }
 
     @Override
-    public String toString() { return value + " " + unit.getUnitName(); }
+    public String toString() {
+        return value + " " + unit;
+    }
 }
